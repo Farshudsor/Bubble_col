@@ -2,9 +2,9 @@
 import casadi.*
 
 %bubble colomn opperates for [run_time*Tsamp] hrs
-run_time = 2; % Time horizon
-n_pred = 100; % prediction horizon
-n_ctrl = 100; % number of control intervals
+run_time = 50; % Time horizon
+n_pred = 49; % prediction horizon
+n_ctrl = 49; % number of control intervals
 Tsamp = 10;   % timestemps between control actions
 
 hrs = run_time*Tsamp;
@@ -27,12 +27,13 @@ theta21 = SX.sym('theta3');      theta22 = SX.sym('theta1');
 theta31 = SX.sym('theta2');      theta32 = SX.sym('theta3');  
 
 
-xk = [x1; x2; x3];  theta = [theta11; theta21; theta31; theta12; theta22; theta32];
+xk = [x1; x2; x3];  
+theta = [theta11; theta21; theta31; theta12; theta22; theta32];
 
 vk = SX.sym('vk',n_st);    % measurment noise
 
 % Parameters
-selectivity = 2;
+slt = 1;
 Ma = 60.0/1000;       % Ma molecular weight g/mmol
 Me = 46/1000;       % CO molecular weight g/mmol
 
@@ -78,10 +79,10 @@ Chx = Function('Chx',{xk},{jacobian(fy,xk)});
 
 % Initial values
 uk_opt = [.0];   xkp = [0, 0, .1];
-theta_par = zeros(1,6)+.1;
+theta_par = [0.04428, 0.0166, -0.002656, 8.581, 3.117, 0.756];
 
 %EKF covar matricies
-Qz = eye(n_st+n_par);    R = eye(n_st);     Sigmak_p = Qz;
+Qz = eye(n_st+n_par);    R = eye(n_st)*0;     Sigmak_p = Qz;
 
 xkh0 = xkp;
 zkh0 =vertcat(xkh0',theta_par');
@@ -92,6 +93,12 @@ res_xk(1,:) = xkp;
 res_theta(1,:) = theta_par;
 
 Yend = []; %all HF model states for next integration step
+
+% Set IPOPT conditions
+opts = struct;
+opts.ipopt.max_iter = 1000;
+opts.ipopt.print_level = 5;
+opts.ipopt.output_file = 'Main_out.txt';
 
 tic()
 
@@ -121,10 +128,10 @@ for k = 1:run_time
     %Generates predictions 
     [Jce, qu_ce, lbq, ubq, g, lbg, ubg, qu_init] = prediction(F_ode,...
                             + n_pred,n_ctrl,n_st,n_par,n_ip,ulb,uub,...
-                            + xlb,xub,xk,theta_par,selec,Tsamp,xkh0,uk_opt);
+                            + xlb,xub,xk,theta_par,slt,Tsamp,xkh0,uk_opt);
     %Formulate nlp & solver
     prob = struct('x',qu_ce, 'f',Jce, 'g',g);
-    solver = nlpsol('solver_mpc', 'ipopt', prob);
+    solver = nlpsol('solver_mpc', 'ipopt', prob,opts);
     %Solve
     res_mpc = solver('x0',qu_init,'lbx',lbq,'ubx',ubq,'lbg',lbg,'ubg',ubg);
     
@@ -158,24 +165,21 @@ end
 solve_time = toc();
 
 %% Save results
-results = load('results.mat');
+results_loaded = load('results.mat');
 var_names = {'Ce','Ca','Cx', 'D', 've', 'va', 'mu', 'w', 'solve_time'};
 
 if 1
     results = table(res_xk(:,1)',res_xk(:,1)',res_xk(:,1)',res_uk',...
                     +res_theta(:,1)', res_theta(:,2)', res_theta(:,3)',...
                     +vkp', solve_time,'VariableNames',var_names);
-    results = table2struct(results);
+    results_loaded = table2struct(results);
 
 else
     add = struct('Ce',res_xk(:,1)','Ca',res_xk(:,1)','Cx',res_xk(:,1)','D',res_uk','ve',res_theta(:,1)','va', res_theta(:,2)','mu', res_theta(:,3)','w', vkp','solve_time', solve_time);
-     
-    
-    results = [results;add];
+    results_loaded.results = [results_loaded.results;add];
 end
 
-new = table2struct(results);
-save('results.mat', '-struct', 'results')
+save('results.mat', '-struct', 'results_loaded');
 
 
 %% Plotting

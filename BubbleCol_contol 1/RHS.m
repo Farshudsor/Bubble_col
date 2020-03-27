@@ -51,11 +51,11 @@ for j = 1:nmodel
     ub(j,1) = Inf;
     
     % CO
-    lb(j,2) = -v_cm*max([cl(j) 0])/(Kc + cl(j) + cl(j)^2/Kic)%*max([(1 - y(2+ns*nmodel)/Amax) 0])*max([(1 - y(3+ns*nmodel)/Emax) 0]);;
+    lb(j,2) = -v_cm*max([cl(j) 0])/(Kc + cl(j) + cl(j)^2/Kic);%*max([(1 - y(2+ns*nmodel)/Amax) 0])*max([(1 - y(3+ns*nmodel)/Emax) 0]);;
     ub(j,2) = 0;
 
     % CO2 
-    lb(j,3) = -v_c2m*max([c2l(j) 0])/(Kc2 + c2l(j))%*max([(1 - y(2+ns*nmodel)/Amax) 0])*max([(1 - y(3+ns*nmodel)/Emax) 0]);
+    lb(j,3) = -v_c2m*max([c2l(j) 0])/(Kc2 + c2l(j));%*max([(1 - y(2+ns*nmodel)/Amax) 0])*max([(1 - y(3+ns*nmodel)/Emax) 0]);
     ub(j,3) = Inf;
     
     % Acetate
