@@ -2,7 +2,7 @@
 import casadi.*
 
 %bubble colomn opperates for [run_time*Tsamp] hrs
-run_time = 10; % Time horizon
+run_time = 50; % Time horizon
 n_pred = 100; % prediction horizon
 n_ctrl = 100; % number of control intervals
 Tsamp = 10;   % timestemps between control actions
@@ -32,6 +32,7 @@ xk = [x1; x2; x3];  theta = [theta11; theta21; theta31; theta12; theta22; theta3
 vk = SX.sym('vk',n_st);    % measurment noise
 
 % Parameters
+slt = 1;
 Ma = 60.0/1000;       % Ma molecular weight g/mmol
 Me = 46/1000;       % CO molecular weight g/mmol
 
@@ -120,7 +121,7 @@ for k = 1:run_time
     %Generates predictions 
     [Jce, qu_ce, lbq, ubq, g, lbg, ubg, qu_init] = prediction(F_ode,...
                             + n_pred,n_ctrl,n_st,n_par,n_ip,ulb,uub,...
-                            + xlb,xub,xk,theta_par,uk,Tsamp,xkh0,uk_opt);
+                            + xlb,xub,xk,theta_par,slt,Tsamp,xkh0,uk_opt);
     %Formulate nlp & solver
     prob = struct('x',qu_ce, 'f',Jce, 'g',g);
     solver = nlpsol('solver_mpc', 'ipopt', prob);
@@ -168,12 +169,9 @@ if 1
 
 else
     add = struct('Ce',res_xk(:,1)','Ca',res_xk(:,1)','Cx',res_xk(:,1)','D',res_uk','ve',res_theta(:,1)','va', res_theta(:,2)','mu', res_theta(:,3)','w', vkp','solve_time', solve_time);
-     
-    
     results = [results;add];
 end
 
-new = table2struct(results);
 save('results.mat', '-struct', 'results')
 
 

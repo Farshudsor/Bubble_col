@@ -1,6 +1,6 @@
 function [Jce, qu_ce, lbq, ubq, g, lbg, ubg, qu_init] = ....
      prediction(F_ode,n_pred,n_ctrl,n_st,n_par,n_ip,ulb,uub,xlb,xub,xk,...
-     theta_par,uk,Tsamp,xkh0,uk_opt)
+     theta_par,slt,Tsamp,xkh0,uk_opt)
 
 import casadi.*
 
@@ -43,7 +43,7 @@ for i = 1:n_pred
     x_end = F_ode('x0',Xk, 'p',vertcat(theta_par,Uk));
     xk_end = x_end.xf;
     %add to cost
-    Jce = Jce - xk_end(1) + (0.5 + xk_end(2)/xk_end(1))^100;
+    Jce = Jce - xk_end(1) ;%+ (0.5 + xk_end(2)/xk_end(1))^100;
 
     %Create new state variable 
     Xk = MX.sym(['X_' num2str(i+1)],n_st);
@@ -56,6 +56,11 @@ for i = 1:n_pred
     g = vertcat(g, (xk_end-Xk));
     lbg = [lbg, xlb];
     ubg = [ubg, xub];
+    
+    %enforce selectivity
+    g = vertcat(g, (Xk(1)/Xk(2)) );
+    lbg = [lbg, slt];
+    ubg = [ubg, inf];    
 end
 
 
