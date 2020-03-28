@@ -165,17 +165,18 @@ end
 solve_time = toc();
 
 %% Save results
-results_loaded = load('results.mat');
-var_names = {'Ce','Ca','Cx', 'D', 've', 'va', 'mu', 'w', 'solve_time'};
+results_loaded.results = load('results.mat');
+var_names = {'Ce','Ca','Cx', 'D', 'T11', 'T21', 'T23','T12', 'T22', 'T33', 'v', 'solve_time'};
 
 if 1
-    results = table(res_xk(:,1)',res_xk(:,1)',res_xk(:,1)',res_uk',...
+    results = table(res_xk(:,1)',res_xk(:,2)',res_xk(:,3)',res_uk',...
                     +res_theta(:,1)', res_theta(:,2)', res_theta(:,3)',...
+                    +res_theta(:,4)', res_theta(:,5)', res_theta(:,6)',...
                     +vkp', solve_time,'VariableNames',var_names);
-    results_loaded = table2struct(results);
+    results_loaded.results = table2struct(results);
 
 else
-    add = struct('Ce',res_xk(:,1)','Ca',res_xk(:,1)','Cx',res_xk(:,1)','D',res_uk','ve',res_theta(:,1)','va', res_theta(:,2)','mu', res_theta(:,3)','w', vkp','solve_time', solve_time);
+    add = struct('Ce',res_xk(:,1)','Ca',res_xk(:,2)','Cx',res_xk(:,3)','D',res_uk','ve',res_theta(:,1)','va', res_theta(:,2)','mu', res_theta(:,3)','w', vkp','solve_time', solve_time);
     results_loaded.results = [results_loaded.results;add];
 end
 
@@ -184,50 +185,68 @@ save('results.mat', '-struct', 'results_loaded');
 
 %% Plotting
 
-if 0
+if 1
     figure(1)
-    plot([1:1000],res_xk(:,3))
+    plot([0:hrs],res_xk(:,3))
     xlabel('Time [hr]')
     ylabel('Biomass [g/L]')
-    xlim([0 1000])
+    xlim([0 hrs])
 
     figure(2)
-    plot([1:1000],res_xk(:,2))
+    plot([0:hrs],res_xk(:,2))
     xlabel('Time [hr]')
     ylabel('acetate [g/L]')
-    xlim([0 1000])
+    xlim([0 hrs])
 
     figure(3)
-    plot([1:1000],res_xk(:,1))
+    plot([0:hrs],res_xk(:,1))
     xlabel('Time [hr]')
     ylabel('Ethanol [g/L]')
-    xlim([0 1000])
+    xlim([0 hrs])
 
     figure(4)
-    plot([1:10:1000],res_uk(2:end))
+    plot([1:Tsamp:hrs],res_uk(2:end))
     xlabel('Time [hr]')
     ylabel('Dilution ')
-    xlim([0 1000])
+    xlim([0 hrs])
 
     figure(5)
     hold on 
-    subplot(3,1,1)
-        plot([1:10:1000],res_theta(2:end,1))
+    subplot(3,2,1)
+        plot([1:Tsamp:hrs],res_theta(2:end,1))
         xlabel('Time [hr]')
-        ylabel('Theta 1 - v_e ')
-        xlim([0 1000])
+        ylabel('Theta 1,1 - v_e ')
+        xlim([0 hrs])
 
-    subplot(3,1,2)
-        plot([1:10:1000],res_theta(2:end,2))
+    subplot(3,2,3)
+        plot([1:Tsamp:hrs],res_theta(2:end,2))
         xlabel('Time [hr]')
-        ylabel('Theta 2 - v_a ')
-        xlim([0 1000])
+        ylabel('Theta 2,1 - v_a ')
+        xlim([0 hrs])
 
-    subplot(3,1,3)
-        plot([1:10:1000],res_theta(2:end,2))
+    subplot(3,2,5)
+        plot([1:Tsamp:hrs],res_theta(2:end,3))
         xlabel('Time [hr]')
-        ylabel('Theta 3 - \mu ')
-        xlim([0 1000])
+        ylabel('Theta 3,1 - \mu ')
+        xlim([0 hrs])
+        
+    subplot(3,2,2)
+        plot([1:Tsamp:hrs],res_theta(2:end,4))
+        xlabel('Time [hr]')
+        ylabel('Theta 1,2 - v_e ')
+        xlim([0 hrs])
+
+    subplot(3,2,4)
+        plot([1:Tsamp:hrs],res_theta(2:end,5))
+        xlabel('Time [hr]')
+        ylabel('Theta 2,2 - v_a ')
+        xlim([0 hrs])
+
+    subplot(3,2,6)
+        plot([1:Tsamp:hrs],res_theta(2:end,6))
+        xlabel('Time [hr]')
+        ylabel('Theta 3,2 - \mu ')
+        xlim([0 hrs])
 end
 
 
