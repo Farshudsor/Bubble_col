@@ -3,8 +3,8 @@ import casadi.*
 
 %bubble colomn opperates for [run_time*Tsamp] hrs
 run_time = 50; % Time horizon
-n_pred = 49; % prediction horizon
-n_ctrl = 49; % number of control intervals
+n_pred = 50; % prediction horizon
+n_ctrl = 50; % number of control intervals
 Tsamp = 10;   % timestemps between control actions
 
 hrs = run_time*Tsamp;
@@ -33,13 +33,13 @@ theta = [theta11; theta21; theta31; theta12; theta22; theta32];
 vk = SX.sym('vk',n_st);    % measurment noise
 
 % Parameters
-slt = 1;
+slt = .84;
 Ma = 60.0/1000;       % Ma molecular weight g/mmol
 Me = 46/1000;       % CO molecular weight g/mmol
 
 % Constraints
 xlb=[0,0,0];     xub=[inf,inf,inf];
-ulb=[0];     uub=[.4];
+ulb=[0.01];     uub=[.1];
 
 % Measurment noise
 vkp = rand([run_time,1])*.00;
@@ -78,8 +78,8 @@ Ch = Function('Ch',{vertcat(xk,theta)},{jacobian(fy,vertcat(xk,theta))});
 Chx = Function('Chx',{xk},{jacobian(fy,xk)});
 
 % Initial values
-uk_opt = [.0];   xkp = [0, 0, .1];
-theta_par = [0.01, 0.01, -0.001, 1.9, .83, .064];
+uk_opt = [.06];   xkp = [0, 0, .1];
+theta_par = [0.01, -0.01, -0.001, 1.9, 10, .064];
 
 %EKF covar matricies
 Qz = eye(n_st+n_par);    R = eye(n_st)*0;     Sigmak_p = Qz;
@@ -139,9 +139,14 @@ for k = 1:run_time
     uk_ce = res_mpc.x;
     uk_opt = uk_ce(n_st+1:n_st+n_ip)';
 
+    if k == 10
+        'test main'        
+    end
+    
     %Simulate the system
     [xki, Yend] = main(uk_opt, xkp, Yend);
-    xkp = xki(end, :);   
+    xkp = xki(end, :);
+   
    
     %EKF prediction
     Az = Jz(xkh0,uk_opt,theta_par);
@@ -153,11 +158,13 @@ for k = 1:run_time
 
     % Save results
     res_uk(k+1,:) =full(uk_opt) ;
-    res_xk((k-1)*Tsamp+1:k*Tsamp,:) =xki ;
+    res_xk((k-1)*Tsamp+1:k*Tsamp,:) =xki(:,:) ;
     res_theta(k+1,:) =full(theta_par);
     
     '************'
     (k*Tsamp)
+    '************'
+    xkp
     '************'
 
 end
@@ -165,22 +172,28 @@ end
 solve_time = toc();
 
 %% Save results
-results_loaded = load('results.mat');
-var_names = {'Ce','Ca','Cx', 'D', 've', 'va', 'mu', 'w', 'solve_time'};
+if 1
+    results_loaded.results = load('results.mat');
+    var_names = {'Ce','Ca','Cx', 'D', 'T11', 'T21', 'T31','T12', 'T22', 'T32', 'v', 'solve_time'};
 
-if 0
-    results = table(res_xk(:,1)',res_xk(:,2)',res_xk(:,3)',res_uk',...
-                    +res_theta(:,1)', res_theta(:,2)', res_theta(:,3)',...
-                    +vkp', solve_time,'VariableNames',var_names);
-    results_loaded. = table2struct(results);
+    if 0
+        results = table(res_xk(:,1)',res_xk(:,2)',res_xk(:,3)',res_uk',...
+                        +res_theta(:,1)', res_theta(:,2)', res_theta(:,3)',...
+                        +res_theta(:,4)', res_theta(:,5)', res_theta(:,6)',...
+                        +vkp', solve_time,'VariableNames',var_names);
+        results_loaded.results = table2struct(results);
 
-else
-    add = struct('Ce',res_xk(:,1)','Ca',res_xk(:,2)','Cx',res_xk(:,3)','D',res_uk','ve',res_theta(:,1)','va', res_theta(:,2)','mu', res_theta(:,3)','w', vkp','solve_time', solve_time);
-    results_loaded.results = [results_loaded.results;add];
+    else
+        add = struct('Ce',res_xk(:,1)','Ca',res_xk(:,2)','Cx',...
+            + res_xk(:,3)','D',res_uk','T11',res_theta(:,1)','T21', ...
+            + res_theta(:,2)','T31', res_theta(:,3)','T12',res_theta(:,4)','T22', ...
+            + res_theta(:,5)','T32', res_theta(:,6)'
+        + 'w', vkp','solve_time', solve_time);
+        results_loaded.results = [results_loaded.results;add];
+    end
+
+    save('results.mat', '-struct', 'results_loaded');
 end
-
-save('results.mat', '-struct', 'results_loaded');
-
 
 %% Plotting
 
@@ -211,41 +224,49 @@ if 1
 
     figure(5)
     hold on 
-    subplot(6,1,1)
+    subplot(3,2,1)
         plot([1:Tsamp:hrs],res_theta(2:end,1))
         xlabel('Time [hr]')
-        ylabel('Theta 1 - v_e ')
+        ylabel('Theta 1,1 - v_e ')
         xlim([0 hrs])
 
-    subplot(6,1,2)
+    subplot(3,2,3)
         plot([1:Tsamp:hrs],res_theta(2:end,2))
         xlabel('Time [hr]')
-        ylabel('Theta 2 - v_a ')
+        ylabel('Theta 2,1 - v_a ')
         xlim([0 hrs])
 
-    subplot(6,1,3)
+    subplot(3,2,5)
         plot([1:Tsamp:hrs],res_theta(2:end,3))
         xlabel('Time [hr]')
-        ylabel('Theta 3 - \mu ')
+        ylabel('Theta 3,1 - \mu ')
         xlim([0 hrs])
         
-    subplot(6,2,1)
+    subplot(3,2,2)
         plot([1:Tsamp:hrs],res_theta(2:end,4))
         xlabel('Time [hr]')
-        ylabel('Theta 1 - v_e ')
+        ylabel('Theta 1,2 - v_e ')
         xlim([0 hrs])
 
-    subplot(6,2,2)
+    subplot(3,2,4)
         plot([1:Tsamp:hrs],res_theta(2:end,5))
         xlabel('Time [hr]')
-        ylabel('Theta 2 - v_a ')
+        ylabel('Theta 2,2 - v_a ')
         xlim([0 hrs])
 
-    subplot(6,2,3)
+    subplot(3,2,6)
         plot([1:Tsamp:hrs],res_theta(2:end,6))
         xlabel('Time [hr]')
-        ylabel('Theta 3 - \mu ')
+        ylabel('Theta 3,2 - \mu ')
         xlim([0 hrs])
+        
+    figure(6)
+    hold on
+    plot([0:hrs],res_xk(:,1)./res_xk(:,2))
+    plot([0:hrs], ones(hrs+1,1)*slt)
+    xlabel('Time [hr]')
+    ylabel('selectivity [-]')
+    xlim([0 hrs])
 end
 
 

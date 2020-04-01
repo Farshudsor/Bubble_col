@@ -25,7 +25,7 @@ D(:,:) = results.results.D;
 
 T11(:,:) = results.results.T11;
 T21(:,:) = results.results.T21;
-T31(:,:) = results.results.T31;
+T31(:,:) = results.results.T32;
 T12(:,:) = results.results.T12;
 T22(:,:) = results.results.T22;
 T32(:,:) = results.results.T32;
@@ -98,7 +98,7 @@ subplot(3,2,3)
     xlim([0 hrs])
 
 subplot(3,2,5)
-    for i = 1:sx(1)
+    for i = 1:sz(1)
         plot([1:Tsamp:hrs],T31(i,:))
     end
     xlabel('Time [hr]')

@@ -58,9 +58,11 @@ for i = 1:n_pred
     ubg = [ubg, xub];
     
     %enforce selectivity
-    g = vertcat(g, (Xk(1) -slt*Xk(2)) );
+    g = vertcat(g, (Xk(1) - slt*Xk(2)) );
     lbg = [lbg, 0];
-    ubg = [ubg, inf];    
+    ubg = [ubg, 0];
+    
+
 end
 
 
