@@ -1,6 +1,6 @@
 function [Jce, qu_ce, lbq, ubq, g, lbg, ubg, qu_init] = ....
      prediction(F_ode,n_pred,n_ctrl,n_st,n_par,n_ip,ulb,uub,xlb,xub,xk,...
-     theta_par,slt,Tsamp,xkh0,uk_opt)
+     theta_par,slt,Tsamp,xkh0,uk_opt, slt_p)
 
 import casadi.*
 
@@ -20,6 +20,8 @@ lbq = xkh0;
 ubq = xkh0;
 qu_init = xkh0;
 Xk = X0;
+
+alpha = 1-slt^(-1);
 
 for i = 1:n_pred
     
@@ -43,7 +45,8 @@ for i = 1:n_pred
     x_end = F_ode('x0',Xk, 'p',vertcat(theta_par,Uk));
     xk_end = x_end.xf;
     %add to cost
-    Jce = Jce - xk_end(1) ;%+ (0.5 + xk_end(2)/xk_end(1))^100;
+    Jce = Jce - xk_end(1) + (alpha + xk_end(2)/(xk_end(1)+eps))^slt_p;
+    %Jce = Jce - xk_end(1) ;
 
     %Create new state variable 
     Xk = MX.sym(['X_' num2str(i+1)],n_st);
@@ -55,13 +58,14 @@ for i = 1:n_pred
     %force new state var to equal result of integration
     g = vertcat(g, (xk_end-Xk));
     lbg = [lbg, xlb];
-    ubg = [ubg, xub];
+    ubg = [ubg, xlb];
     
     %enforce selectivity
-    g = vertcat(g, (Xk(1) - slt*Xk(2)) );
-    lbg = [lbg, 0];
-    ubg = [ubg, 0];
-    
+%     if slt_p ~=0
+%         g = vertcat(g, (Xk(1) - slt*Xk(2)) );
+%         lbg = [lbg, 0];
+%         ubg = [ubg, inf];
+%     end
 
 end
 

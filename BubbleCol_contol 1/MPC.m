@@ -2,10 +2,10 @@
 import casadi.*
 
 %bubble colomn opperates for [run_time*Tsamp] hrs
-run_time = 50; % Time horizon
-n_pred = 50; % prediction horizon
-n_ctrl = 50; % number of control intervals
-Tsamp = 10;   % timestemps between control actions
+run_time = 500; % Time horizon
+n_pred = 10; % prediction horizon
+n_ctrl = 10; % number of control intervals
+Tsamp = 1;   % timestemps between control actions
 
 hrs = run_time*Tsamp;
 
@@ -26,14 +26,14 @@ theta11 = SX.sym('theta1');      theta12 = SX.sym('theta2');
 theta21 = SX.sym('theta3');      theta22 = SX.sym('theta1');  
 theta31 = SX.sym('theta2');      theta32 = SX.sym('theta3');  
 
-
 xk = [x1; x2; x3];  
 theta = [theta11; theta21; theta31; theta12; theta22; theta32];
 
 vk = SX.sym('vk',n_st);    % measurment noise
 
 % Parameters
-slt = .84;
+slt = .84;          %selectivity
+slt_p = 10;         %power on selectivity soft constraint
 Ma = 60.0/1000;       % Ma molecular weight g/mmol
 Me = 46/1000;       % CO molecular weight g/mmol
 
@@ -79,7 +79,7 @@ Chx = Function('Chx',{xk},{jacobian(fy,xk)});
 
 % Initial values
 uk_opt = [.06];   xkp = [0, 0, .1];
-theta_par = [0.01, -0.01, -0.001, 1.9, 10, .064];
+theta_par = [1.316, -0.597, -0.001, 1.8753, .83, .064];
 
 %EKF covar matricies
 Qz = eye(n_st+n_par);    R = eye(n_st)*0;     Sigmak_p = Qz;
@@ -124,29 +124,25 @@ for k = 1:run_time
     xkh0 = zkh0(1:n_st);
     theta_par = zkh0(n_st+1:end);
     Sigmak = mtimes((eye(n_st+n_par) - mtimes(Kkh,Czh)),Sigmak_p);
+    
 
     %Generates predictions 
     [Jce, qu_ce, lbq, ubq, g, lbg, ubg, qu_init] = prediction(F_ode,...
                             + n_pred,n_ctrl,n_st,n_par,n_ip,ulb,uub,...
-                            + xlb,xub,xk,theta_par,slt,Tsamp,xkh0,uk_opt);
+                            + xlb,xub,xk,theta_par,slt,Tsamp,xkh0,uk_opt,slt_p);
     %Formulate nlp & solver
     prob = struct('x',qu_ce, 'f',Jce, 'g',g);
-    solver = nlpsol('solver_mpc', 'ipopt', prob,opts);
+    solver = nlpsol('solver_mpc', 'ipopt', prob, opts);
     %Solve
     res_mpc = solver('x0',qu_init,'lbx',lbq,'ubx',ubq,'lbg',lbg,'ubg',ubg);
     
     %Take first optimal control action
     uk_ce = res_mpc.x;
     uk_opt = uk_ce(n_st+1:n_st+n_ip)';
-
-    if k == 10
-        'test main'        
-    end
     
     %Simulate the system
     [xki, Yend] = main(uk_opt, xkp, Yend);
     xkp = xki(end, :);
-   
    
     %EKF prediction
     Az = Jz(xkh0,uk_opt,theta_par);
@@ -166,6 +162,11 @@ for k = 1:run_time
     '************'
     xkp
     '************'
+    
+    if k == 100
+        'break'
+    end
+    
 
 end
 

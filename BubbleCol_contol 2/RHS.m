@@ -2,12 +2,12 @@
 % DFBAlab: Dynamic Flux Balance Analysis laboratory                       %
 % Process Systems Engineering Laboratory, Cambridge, MA, USA              %
 % July 2014                                                               %
-% Written by Jose A. Gomez and Kai Höffner                                %
+% Written by Jose A. Gomez and Kai Hï¿½ffner                                %
 %                                                                         % 
 % This code can only be used for academic purposes. When using this code  %
 % please cite:                                                            %
 %                                                                         %
-% Gomez, J.A., Höffner, K. and Barton, P. I.                              %
+% Gomez, J.A., Hï¿½ffner, K. and Barton, P. I.                              %
 % DFBAlab: A fast and reliable MATLAB code for Dynamic Flux Balance       %
 % Analysis. Submitted.                                                    %
 %                                                                         %
@@ -37,6 +37,8 @@ Kc   = param(2);
 v_c2m = param(3);
 Kc2   = param(4);
 Kic = param(5);
+Emax = 60;
+Amax = 20;
 
 j=1:nmodel;
 cl(j) = y(3+(j-1)*ns);
@@ -49,11 +51,11 @@ for j = 1:nmodel
     ub(j,1) = Inf;
     
     % CO
-    lb(j,2) = -v_cm*max([cl(j) 0])/(Kc + cl(j) + cl(j)^2/Kic);
+    lb(j,2) = -v_cm*max([cl(j) 0])/(Kc + cl(j) + cl(j)^2/Kic);%*max([(1 - y(2+ns*nmodel)/Amax) 0])*max([(1 - y(3+ns*nmodel)/Emax) 0]);;
     ub(j,2) = 0;
 
     % CO2 
-    lb(j,3) = -v_c2m*max([c2l(j) 0])/(Kc2 + c2l(j));
+    lb(j,3) = -v_c2m*max([c2l(j) 0])/(Kc2 + c2l(j));%*max([(1 - y(2+ns*nmodel)/Amax) 0])*max([(1 - y(3+ns*nmodel)/Emax) 0]);
     ub(j,3) = Inf;
     
     % Acetate

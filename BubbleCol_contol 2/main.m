@@ -25,8 +25,8 @@ function [x_k, Yend] = main(uk_opt, xkp, Ye)
 
 % Set number of models and simulation time
     
-nmodel = 50;
-tspan = [0,10];
+nmodel = 20;
+tspan = [0,1];
 N = nmodel+1;                   % number of reactor discretization points
 ns = 4;                         % number of state variables change with location
 
@@ -134,9 +134,9 @@ INFO.C = C;
 
 % Set operating conditions
 L = 1.06;                         % reactor length, m 
-ug = full(uk_opt(1));                        % constant gas velocity, m/h
+ug = full(uk_opt(2));;                        % constant gas velocity, m/h
 ul = -158.5;                      % Liquid recyle rate, m/h
-D = full(uk_opt(2));                         % dillution rate,1/h
+D = full(uk_opt(1));                         % dillution rate,1/h
 eg = 0.309;                       % gas holdup, %
 Area = 0.002436;                  % reactor cross-sectional area, m^2
 zs = L/(N-1);                     % spatial step size, m
@@ -218,10 +218,10 @@ INFO.tolevt = 10*INFO.tol; % Tolerance for event detection. Has to be greater
 % you can add the 'Nonnegative' option.
 
 options = odeset('AbsTol',1E-6,'RelTol',1E-6, ...
-'Events',@evts,'OutputSel',1,'OutputFcn',@odeplot); % 1 is for tracking the first column
+'Events',@evts); % 1 is for tracking the first column
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-if isempty(Ye)
+if isempty(Ye) %if this is the first step in the MPC
     [model,INFO] = ModelSetupM(model,Y0,INFO);
 else
     [model,INFO] = ModelSetupM(model,Ye,INFO);
@@ -295,11 +295,13 @@ end
 Y(:,(N-1)*ns+3)=coeff(:,1);
 Y(:,(N-1)*ns+4)=coeff(:,2);
 
+%Time = unique(T)
+%l = length(Y(:,1));
+%indecies = floor([l/tspan(2):l/tspan(2):l]);
 
-indecies = [1:25:250];
-Cx = Y(indecies,ns*N+1);
-Ca = Y(indecies,ns*N+2);
-Ce = Y(indecies,ns*N+3);
+Cx = Y(end,ns*N+1);
+Ca = Y(end,ns*N+2);
+Ce = Y(end,ns*N+3);
 
 x_k = [Ce, Ca, Cx];
 Yend = Y(end,:);

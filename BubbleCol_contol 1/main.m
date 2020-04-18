@@ -26,7 +26,7 @@ function [x_k, Yend] = main(uk_opt, xkp, Ye)
 % Set number of models and simulation time
     
 nmodel = 20;
-tspan = [0,10];
+tspan = [0,1];
 N = nmodel+1;                   % number of reactor discretization points
 ns = 4;                         % number of state variables change with location
 
@@ -295,12 +295,13 @@ end
 Y(:,(N-1)*ns+3)=coeff(:,1);
 Y(:,(N-1)*ns+4)=coeff(:,2);
 
+%Time = unique(T)
+%l = length(Y(:,1));
+%indecies = floor([l/tspan(2):l/tspan(2):l]);
 
-l = length(Y(:,1));
-indecies = floor([l/tspan(2):l/tspan(2):l]);
-Cx = Y(indecies,ns*N+1);
-Ca = Y(indecies,ns*N+2);
-Ce = Y(indecies,ns*N+3);
+Cx = Y(end,ns*N+1);
+Ca = Y(end,ns*N+2);
+Ce = Y(end,ns*N+3);
 
 x_k = [Ce, Ca, Cx];
 Yend = Y(end,:);

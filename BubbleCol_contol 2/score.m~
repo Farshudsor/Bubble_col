@@ -1,0 +1,21 @@
+function [total] = score(E,A)
+
+    T1 = sum(E); % total EtOH produced
+    
+    T2 = 0; % penalize selectivity
+ 
+    for i = 1:length(A)
+        if A(i)<=.85 && A(i)~=0
+            T2 = T2 + 1/A(i);
+        elseif A(i) ==0
+            T2 = T2 + 1000;
+        end
+    end
+    
+    total = T1-T2
+    
+    
+    
+    
+    
+    
