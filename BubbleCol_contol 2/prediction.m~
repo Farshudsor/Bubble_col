@@ -55,6 +55,11 @@ for i = 1:n_pred
     lbq = vertcat(lbq, xlb');
     ubq = vertcat(ubq, xub');
     qu_init = vertcat(qu_init, xkh0);
+   
+    %barrier constraint
+    if Xk(1)/Xk(2) <= slt
+        Jce = Jce + 10^3;
+    end
     
     %force new state var to equal result of integration
     g = vertcat(g, (xk_end-Xk));
@@ -62,11 +67,11 @@ for i = 1:n_pred
     ubg = [ubg, xlb];
     
     %enforce selectivity
-    if slt_p ~=0
-        g = vertcat(g, (Xk(1) - slt*Xk(2)) );
-        lbg = [lbg, 0];
-        ubg = [ubg, inf];
-    end
+%     if slt_p ~=0
+%         g = vertcat(g, (Xk(1) - slt*Xk(2)) );
+%         lbg = [lbg, 0];
+%         ubg = [ubg, inf];
+%     end
 
 end
 

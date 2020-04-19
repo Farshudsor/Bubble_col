@@ -2,7 +2,7 @@ function [nothing] = MPC(some_num)
 
 nothing = 0;
 import casadi.*
-res_name = 'results_sample3.mat';
+res_name = 'results_sample4.mat';
 
 
 %bubble colomn opperates for [run_time*Tsamp] hrs
@@ -90,6 +90,7 @@ uk_opt = [.06, 12.6];   xkp = [0, 0, .1];
 theta_nom = [5.717, -.401, 1.917,   .269, -.0145, .00894,   .542, 1.646, .036];
 %theta_par = theta_nom + (rand(1,9)-(0.5))*2; % +/- 1 of nominal
 theta_par = zeros(1,9) + (rand(1,9)-.5)*20; %+/- 10 of 0
+%theta_par = theta_nom; % nominal case
 
 % Ethanol Flux : 57.71*DR  + 0.269*GV +  0.542. (If it doesnt work, try to decreasing 57 to about 5)
 % Acetate Flux : - 4.01*DR    - 0.0145*GV +  1.646  (if it doesnt work try : -4.01 -> -0.4  )

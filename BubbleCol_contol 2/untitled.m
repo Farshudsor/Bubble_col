@@ -1,3 +1,3 @@
-for imast = 100:500
+for imast = 1:5
     nothing = MPC(imast);
 end
