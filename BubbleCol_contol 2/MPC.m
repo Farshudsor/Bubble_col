@@ -6,7 +6,7 @@ res_name = 'results_sample4.mat';
 
 
 %bubble colomn opperates for [run_time*Tsamp] hrs
-run_time = 400; % Time horizon
+run_time = 240; % Time horizon
 n_pred = 10; % prediction horizon
 n_ctrl = 10; % number of control intervals
 Tsamp = 1;   % timestemps between control actions
@@ -89,8 +89,8 @@ Chx = Function('Chx',{xk},{jacobian(fy,xk)});
 uk_opt = [.06, 12.6];   xkp = [0, 0, .1];
 theta_nom = [5.717, -.401, 1.917,   .269, -.0145, .00894,   .542, 1.646, .036];
 %theta_par = theta_nom + (rand(1,9)-(0.5))*2; % +/- 1 of nominal
-theta_par = zeros(1,9) + (rand(1,9)-.5)*20; %+/- 10 of 0
-%theta_par = theta_nom; % nominal case
+%theta_par = zeros(1,9) + (rand(1,9)-.5)*20; %+/- 10 of 0
+theta_par = theta_nom; % nominal case
 
 % Ethanol Flux : 57.71*DR  + 0.269*GV +  0.542. (If it doesnt work, try to decreasing 57 to about 5)
 % Acetate Flux : - 4.01*DR    - 0.0145*GV +  1.646  (if it doesnt work try : -4.01 -> -0.4  )
@@ -152,8 +152,13 @@ for k = 1:run_time
     res_mpc = solver('x0',full(qu_init),'lbx',lbq,'ubx',ubq,'lbg',lbg,'ubg',ubg);
     
     %Take first optimal control action
-    uk_ce = res_mpc.x;
+    uk_ce = res_mpc.x
     uk_opt = uk_ce(n_st+1:n_st+n_ip)';
+    if k==105
+        test1 = uk_ce;
+    elseif k==115
+        test2=uk_ce;
+    end
     
     %Simulate the system
     [xki, Yend] = main(uk_opt, xkp, Yend);
@@ -196,7 +201,7 @@ solve_time = toc();
 
 %% Save results
 if 1
-    if 0
+    if 1
         results_loaded = struct();
         var_names = {'Ce','Ca','Cx', 'D', 'u_g', 'T11', 'T21', 'T31','T12', 'T22', 'T32', 'T13', 'T23', 'T33', 'v', 'solve_time'};
         results = table(res_xk(:,1)',res_xk(:,2)',res_xk(:,3)',res_uk(:,1)', res_uk(:,2)',...

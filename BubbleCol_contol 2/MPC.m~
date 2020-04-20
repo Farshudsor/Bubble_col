@@ -152,7 +152,7 @@ for k = 1:run_time
     res_mpc = solver('x0',full(qu_init),'lbx',lbq,'ubx',ubq,'lbg',lbg,'ubg',ubg);
     
     %Take first optimal control action
-    uk_ce = res_mpc.x;
+    uk_ce = res_mpc.x
     uk_opt = uk_ce(n_st+1:n_st+n_ip)';
     
     %Simulate the system

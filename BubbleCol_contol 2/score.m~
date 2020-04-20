@@ -1,18 +1,16 @@
-function [total] = score(E,A)
+function [total, viol] = score(E,A)
 
-    T1 = sum(E); % total EtOH produced
+    total = sum(E); % total EtOH produced
     
-    T2 = 0; % penalize selectivity
+    violations = 0; % penalize selectivity
  
     for i = 1:length(A)
-        if A(i)<=.85 && A(i)~=0
-            T2 = T2 + 1/A(i);
-        elseif A(i) ==0
-            T2 = T2 + 1000;
+        if A(i)<=.85 
+            T2 = T2 + 1;
         end
     end
     
-    total = T1-T2
+    total = T1-T2;
     
     
     

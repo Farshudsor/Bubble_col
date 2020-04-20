@@ -134,7 +134,7 @@ INFO.C = C;
 
 % Set operating conditions
 L = 1.06;                         % reactor length, m 
-ug = full(uk_opt(2));;                        % constant gas velocity, m/h
+ug = full(uk_opt(2));                        % constant gas velocity, m/h
 ul = -158.5;                      % Liquid recyle rate, m/h
 D = full(uk_opt(1));                         % dillution rate,1/h
 eg = 0.309;                       % gas holdup, %

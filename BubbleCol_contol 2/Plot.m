@@ -1,5 +1,5 @@
 clear
-results = load('results_sample4.mat');
+results = load('results_sample5.mat');
 %results = struct();
 %results.results = res;
 
@@ -48,7 +48,14 @@ for i =1:sx(1)
     st(i) = results.results(i).solve_time;
 end
 
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+leg = {'line 1'};
+for ii = 2:sx(1)
+   leg = [leg, "line "+num2str(ii)] ;
+end
+
 
 figure(1)
 hold on
@@ -58,7 +65,7 @@ end
 xlabel('Time [hr]')
 ylabel('Ethanol [g/L]')
 xlim([0 hrs])
-legend('1','2','3','4')
+clickableLegend(leg)
 
 figure(2)
 hold on
@@ -68,6 +75,8 @@ end
 xlabel('Time [hr]')
 ylabel('acetate [g/L]')
 xlim([0 hrs])
+clickableLegend(leg)
+
 
 figure(3)
 hold on
@@ -77,6 +86,8 @@ end
 xlabel('Time [hr]')
 ylabel('Biomass [g/L]')
 xlim([0 hrs])
+clickableLegend(leg)
+
 
 figure(4)
 hold on
@@ -87,6 +98,8 @@ xlabel('Time [hr]')
 ylabel('Dilution ')
 xlim([0 hrs])
 ylim([.0099 .1001])
+clickableLegend(leg)
+
 
 figure(5)
 hold on
@@ -97,6 +110,7 @@ xlabel('Time [hr]')
 ylabel('Gas velocity ')
 xlim([0 hrs])
 %ylim([.0099 .1001])
+clickableLegend(leg)
 
 
 figure(6)
@@ -105,11 +119,12 @@ for i = 1:sx(1)
     plot([0:hrs-1],Ce(i,:)./Ca(i,:))
 end
 plot([0:hrs-1],ones(hrs,1)*slt)
-
 xlabel('Time [hr]')
 ylabel('Selectivity [g/L]')
 xlim([0 hrs])
 ylim([0 3.5])
+clickableLegend(leg)
+
 
 figure(7)
 sgtitle('rate term, i = \theta_{i,1}D + \theta_{i2}u_g + \theta_{i3}')
@@ -195,13 +210,16 @@ hold on
     ylabel('\theta_{3,3} - \mu ')
     xlim([0 hrs])
 
+    
+clickableLegend(leg)
+
 
 %%
 
-score_1 = score(Ce(1,:),Ca(1,:))
-score_2 = score(Ce(2,:),Ca(2,:))
-score_3 = score(Ce(3,:),Ca(3,:))
-
+for i = 1:sx(1)
+    [tot,viol] =  score(Ce(i,:),Ca(i,:));
+    "run " + num2str(i) + "= score " + num2str(tot) + "; violations " + num2str(viol) 
+end
 
 avg_solve_time =mean(st)
 
