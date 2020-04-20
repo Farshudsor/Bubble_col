@@ -25,6 +25,8 @@ T31 = zeros(sx(1), samp);
 T32 = zeros(sx(1), samp);
 T33 = zeros(sx(1), samp);
 
+st = zeros(sx(1),1);
+
 for i =1:sx(1)
     Ce(i,:) = results.results(i).Ce;
     Ca(i,:) = results.results(i).Ca;
@@ -42,6 +44,8 @@ for i =1:sx(1)
     T13(i,:) = results.results(i).T13;
     T23(i,:) = results.results(i).T23;
     T33(i,:) = results.results(i).T33;
+    
+    st(i) = results.results(i).solve_time;
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -108,13 +112,14 @@ xlim([0 hrs])
 ylim([0 3.5])
 
 figure(7)
+sgtitle('rate term, i = \theta_{i,1}D + \theta_{i2}u_g + \theta_{i3}')
 subplot(3,3,1)
 hold on 
     for i = 1:sx(1)
         plot([1:Tsamp:hrs],T11(i,:))
     end
     xlabel('Time [hr]')
-    ylabel('Theta 1,1 - v_e ')
+    ylabel('\theta_{1,1} - v_e ')
     xlim([0 hrs])
 
 subplot(3,3,4)
@@ -123,7 +128,7 @@ hold on
         plot([1:Tsamp:hrs],T21(i,:))
     end
     xlabel('Time [hr]')
-    ylabel('Theta 2,1 - v_a ')
+    ylabel('\theta_{2,1} - v_a ')
     xlim([0 hrs])
 
 subplot(3,3,7)
@@ -132,7 +137,7 @@ hold on
         plot([1:Tsamp:hrs],T31(i,:))
     end
     xlabel('Time [hr]')
-    ylabel('Theta 3,1 - \mu ')
+    ylabel('\theta_{3,1} - \mu ')
     xlim([0 hrs])
 
 subplot(3,3,2)
@@ -141,7 +146,7 @@ hold on
         plot([1:Tsamp:hrs],T12(i,:))
     end
     xlabel('Time [hr]')
-    ylabel('Theta 1,2 - v_e ')
+    ylabel('\theta_{1,2} - v_e ')
     xlim([0 hrs])
 
 subplot(3,3,5)
@@ -150,7 +155,7 @@ hold on
         plot([1:Tsamp:hrs],T22(i,:))
     end
     xlabel('Time [hr]')
-    ylabel('Theta 2,2 - v_a ')
+    ylabel('\theta_{2,2} - v_a ')
     xlim([0 hrs])
 
 subplot(3,3,8)
@@ -159,7 +164,7 @@ hold on
         plot([1:Tsamp:hrs],T32(i,:))
     end
     xlabel('Time [hr]')
-    ylabel('Theta 3,2 - \mu ')
+    ylabel('\theta_{3,2} - \mu ')
     xlim([0 hrs])
     
     
@@ -169,7 +174,7 @@ hold on
         plot([1:Tsamp:hrs],T13(i,:))
     end
     xlabel('Time [hr]')
-    ylabel('Theta 1,3 - v_e ')
+    ylabel('\theta{1,3} - v_e ')
     xlim([0 hrs])
 
 subplot(3,3,6)
@@ -178,7 +183,7 @@ hold on
         plot([1:Tsamp:hrs],T23(i,:))
     end
     xlabel('Time [hr]')
-    ylabel('Theta 2,3 - v_a ')
+    ylabel('\theta_{2,3} - v_a ')
     xlim([0 hrs])
 
 subplot(3,3,9)
@@ -187,7 +192,7 @@ hold on
         plot([1:Tsamp:hrs],T33(i,:))
     end
     xlabel('Time [hr]')
-    ylabel('Theta 3,3 - \mu ')
+    ylabel('\theta_{3,3} - \mu ')
     xlim([0 hrs])
 
 
@@ -196,9 +201,9 @@ hold on
 score_1 = score(Ce(1,:),Ca(1,:))
 score_2 = score(Ce(2,:),Ca(2,:))
 score_3 = score(Ce(3,:),Ca(3,:))
-score_4 = score(Ce(4,:),Ca(4,:))
-score_5 = score(Ce(5,:),Ca(5,:))
-score_6 = score(Ce(6,:),Ca(6,:))
+
+
+avg_solve_time =mean(st)
 
 
 
