@@ -2,16 +2,16 @@ function [nothing] = MPC(some_num)
 
 nothing = 0;
 import casadi.*
-res_name = 'results_sample4.mat';
+res_name = 'results_sample6.mat';
 
-
+dis = 4; % discritize into 1/dis hours
 %bubble colomn opperates for [run_time*Tsamp] hrs
-run_time = 240; % Time horizon
-n_pred = 10; % prediction horizon
-n_ctrl = 10; % number of control intervals
+run_time = 240*dis; % Time horizon
+n_pred = 6*dis; % prediction horizon
+n_ctrl = 2*dis; % number of control intervals
 Tsamp = 1;   % timestemps between control actions
 
-hrs = run_time*Tsamp;
+hrs = run_time*Tsamp/dis;
 
 n_st = 3;   n_ip = 2;   n_par = 9;
 
@@ -59,9 +59,9 @@ dtheta11 = 0*theta11;    dtheta21 = 0*theta21;    dtheta31 = 0*theta31;
 dtheta12 = 0*theta12;    dtheta22 = 0*theta22;    dtheta32 = 0*theta32;
 dtheta13 = 0*theta12;    dtheta23 = 0*theta22;    dtheta33 = 0*theta32;
 
-sys_ode = [dx1; dx2; dx3];
+sys_ode = [dx1; dx2; dx3]./dis;
 mdl_ode = [dx1; dx2; dx3; dtheta11; dtheta21; dtheta31; dtheta12; ...
-            + dtheta22; dtheta32; dtheta13; dtheta23; dtheta33 ];
+            + dtheta22; dtheta32; dtheta13; dtheta23; dtheta33 ]./dis;
 
 %mdl_ode2 =vertcat(de1+wk2[0],de2+wk2[1],de3+wk2[2],de4+wk2[3],de5+wk2[4],de6+wk2[5],de7+wk2[6],dthetah1,dthetah2)
 %L2   = Function('L2' ,[xk2,uk2,thetah2,wk2],[jacobian((vertcat(xk2,thetah2)+mdl_ode2),wk2)])
@@ -111,7 +111,7 @@ Yend = []; %all HF model states for next integration step
 
 % Set IPOPT conditions
 opts = struct;
-opts.ipopt.max_iter = 1000;
+opts.ipopt.max_iter = 50;
 opts.ipopt.print_level = 5;
 opts.ipopt.output_file = 'Main_out.txt';
 
@@ -137,6 +137,7 @@ for k = 1:run_time
     Kkh = mtimes(Sigmak_p,mtimes(Czh',inv(mtimes(Czh,mtimes(Sigmak_p,Czh')) + R)));
     zkh0 = zkh0 + mtimes(Kkh,(ykp - h(zkh0(1:n_st), zeros(n_st,1))));
     xkh0 = zkh0(1:n_st);
+    %xkh0 = ykp.full();
     theta_par = zkh0(n_st+1:end);
     Sigmak = mtimes((eye(n_st+n_par) - mtimes(Kkh,Czh)),Sigmak_p);
     
@@ -145,6 +146,7 @@ for k = 1:run_time
     [Jce, qu_ce, lbq, ubq, g, lbg, ubg, qu_init] = prediction(F_ode,...
                             + n_pred,n_ctrl,n_st,n_par,n_ip,ulb,uub,...
                             + xlb,xub,xk,theta_par,slt,Tsamp,xkh0,uk_opt,slt_p);
+ %   lbq, ubq, lbg, ubg
     %Formulate nlp & solver
     prob = struct('x',qu_ce, 'f',Jce, 'g',g);
     solver = nlpsol('solver_mpc', 'ipopt', prob, opts);
@@ -152,7 +154,7 @@ for k = 1:run_time
     res_mpc = solver('x0',full(qu_init),'lbx',lbq,'ubx',ubq,'lbg',lbg,'ubg',ubg);
     
     %Take first optimal control action
-    uk_ce = res_mpc.x
+    uk_ce = res_mpc.x;
     uk_opt = uk_ce(n_st+1:n_st+n_ip)';
     if k==105
         test1 = uk_ce;
@@ -178,7 +180,7 @@ for k = 1:run_time
     res_theta(k+1,:) =full(theta_par);
     
     '************'
-    (k*Tsamp)
+    (k*Tsamp) 
     '************'
     xkp
     '************'
@@ -201,7 +203,7 @@ solve_time = toc();
 
 %% Save results
 if 1
-    if 1
+    if 0
         results_loaded = struct();
         var_names = {'Ce','Ca','Cx', 'D', 'u_g', 'T11', 'T21', 'T31','T12', 'T22', 'T32', 'T13', 'T23', 'T33', 'v', 'solve_time'};
         results = table(res_xk(:,1)',res_xk(:,2)',res_xk(:,3)',res_uk(:,1)', res_uk(:,2)',...

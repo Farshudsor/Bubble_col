@@ -1,11 +1,22 @@
 clear
-results = load('results_sample5.mat');
+results = load('results_sample6.mat');
 %results = struct();
 %results.results = res;
 
 sx = size(results.results);
-hrs = 401;
-samp = 401;
+
+%for sample5
+hrs = 960;
+samp = 961;
+plottime = [0:.25:samp/4-.25];
+plottime2 = [0:.25:hrs/4-.25];
+
+
+%for sample4
+% hrs = 401;
+% samp = 401;
+% plottime = [1:1:hrs];
+
 Tsamp = 1;
 slt = .84;
 
@@ -60,43 +71,43 @@ end
 figure(1)
 hold on
 for i = 1:sx(1)
-    plot([1:hrs],Ce(i,:))
+    plot(plottime2,Ce(i,:))
 end
 xlabel('Time [hr]')
 ylabel('Ethanol [g/L]')
-xlim([0 hrs])
+%xlim([0 hrs/4])
 clickableLegend(leg)
 
 figure(2)
 hold on
 for i = 1:sx(1)
-    plot([0:hrs-1],Ca(i,:))
+    plot(plottime2,Ca(i,:))
 end
 xlabel('Time [hr]')
 ylabel('acetate [g/L]')
-xlim([0 hrs])
+%xlim([0 hrs/4])
 clickableLegend(leg)
 
 
 figure(3)
 hold on
 for i = 1:sx(1)
-    plot([0:hrs-1],Cx(i,:))
+    plot(plottime2,Cx(i,:))
 end
 xlabel('Time [hr]')
 ylabel('Biomass [g/L]')
-xlim([0 hrs])
+%xlim([0 hrs/4])
 clickableLegend(leg)
 
 
 figure(4)
 hold on
 for i = 1:sx(1)
-    plot([0:hrs-1],D(i,:))
+    plot(plottime,D(i,:))
 end
 xlabel('Time [hr]')
 ylabel('Dilution ')
-xlim([0 hrs])
+%xlim([0 hrs/4])
 ylim([.0099 .1001])
 clickableLegend(leg)
 
@@ -104,11 +115,11 @@ clickableLegend(leg)
 figure(5)
 hold on
 for i = 1:sx(1)
-    plot([0:hrs-1],ug(i,:))
+    plot(plottime,ug(i,:))
 end
 xlabel('Time [hr]')
 ylabel('Gas velocity ')
-xlim([0 hrs])
+xlim([0 hrs/4])
 %ylim([.0099 .1001])
 clickableLegend(leg)
 
@@ -116,12 +127,12 @@ clickableLegend(leg)
 figure(6)
 hold on
 for i = 1:sx(1)
-    plot([0:hrs-1],Ce(i,:)./Ca(i,:))
+    plot(plottime2,Ce(i,:)./Ca(i,:))
 end
 plot([0:hrs-1],ones(hrs,1)*slt)
 xlabel('Time [hr]')
 ylabel('Selectivity [g/L]')
-xlim([0 hrs])
+xlim([0 hrs/4])
 ylim([0 3.5])
 clickableLegend(leg)
 
@@ -131,87 +142,86 @@ sgtitle('rate term, i = \theta_{i,1}D + \theta_{i2}u_g + \theta_{i3}')
 subplot(3,3,1)
 hold on 
     for i = 1:sx(1)
-        plot([1:Tsamp:hrs],T11(i,:))
+        plot(plottime,T11(i,:))
     end
     xlabel('Time [hr]')
     ylabel('\theta_{1,1} - v_e ')
-    xlim([0 hrs])
+%    xlim([0 hrs/4])
 
 subplot(3,3,4)
 hold on
     for i = 1:sx(1)
-        plot([1:Tsamp:hrs],T21(i,:))
+        plot(plottime,T21(i,:))
     end
     xlabel('Time [hr]')
     ylabel('\theta_{2,1} - v_a ')
-    xlim([0 hrs])
+%    xlim([0 hrs/4])
 
 subplot(3,3,7)
 hold on
     for i = 1:sx(1)
-        plot([1:Tsamp:hrs],T31(i,:))
+        plot(plottime,T31(i,:))
     end
     xlabel('Time [hr]')
     ylabel('\theta_{3,1} - \mu ')
-    xlim([0 hrs])
+    xlim([0 hrs/4])
 
 subplot(3,3,2)
 hold on
     for i = 1:sx(1)
-        plot([1:Tsamp:hrs],T12(i,:))
+        plot(plottime,T12(i,:))
     end
     xlabel('Time [hr]')
     ylabel('\theta_{1,2} - v_e ')
-    xlim([0 hrs])
+%    xlim([0 hrs/4])
 
 subplot(3,3,5)
 hold on
     for i = 1:sx(1)
-        plot([1:Tsamp:hrs],T22(i,:))
+        plot(plottime,T22(i,:))
     end
     xlabel('Time [hr]')
     ylabel('\theta_{2,2} - v_a ')
-    xlim([0 hrs])
+%    xlim([0 hrs/4])
 
 subplot(3,3,8)
 hold on
     for i = 1:sx(1)
-        plot([1:Tsamp:hrs],T32(i,:))
+        plot(plottime,T32(i,:))
     end
     xlabel('Time [hr]')
     ylabel('\theta_{3,2} - \mu ')
-    xlim([0 hrs])
+%    xlim([0 hrs/4])
     
     
  subplot(3,3,3)
 hold on
     for i = 1:sx(1)
-        plot([1:Tsamp:hrs],T13(i,:))
+        plot(plottime,T13(i,:))
     end
     xlabel('Time [hr]')
     ylabel('\theta{1,3} - v_e ')
-    xlim([0 hrs])
+%    xlim([0 hrs/4])
 
 subplot(3,3,6)
 hold on
     for i = 1:sx(1)
-        plot([1:Tsamp:hrs],T23(i,:))
+        plot(plottime,T23(i,:))
     end
     xlabel('Time [hr]')
     ylabel('\theta_{2,3} - v_a ')
-    xlim([0 hrs])
+%    xlim([0 hrs/4])
 
 subplot(3,3,9)
 hold on
     for i = 1:sx(1)
-        plot([1:Tsamp:hrs],T33(i,:))
+        plot(plottime,T33(i,:))
     end
     xlabel('Time [hr]')
     ylabel('\theta_{3,3} - \mu ')
-    xlim([0 hrs])
+%    xlim([0 hrs/4])
 
     
-clickableLegend(leg)
 
 
 %%

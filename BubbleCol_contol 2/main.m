@@ -26,7 +26,7 @@ function [x_k, Yend] = main(uk_opt, xkp, Ye)
 % Set number of models and simulation time
     
 nmodel = 20;
-tspan = [0,1];
+tspan = [0,.25];
 N = nmodel+1;                   % number of reactor discretization points
 ns = 4;                         % number of state variables change with location
 
